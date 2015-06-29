@@ -1,0 +1,210 @@
+var isOperator = {
+	"(" : true,
+	")" : true,
+	"+" : true,
+	"-" : true,
+	"*" : true,
+	"/" : true
+}
+
+var crac = {
+    "1": 12,
+    "2": 14,
+    "3": 15,
+    "4": 17,
+    "5": 18,
+    "6": 19,
+    "7": 20,
+    "8": 21,
+    "9": 23,
+    "10": 24,
+    "11": 25,
+    "12": 27,
+    "13": 28,
+    "14": 29,
+    "15": 30,
+    "16": 31,
+    "17": 32,
+    "18": 33,
+    "19": 34,
+    "20": 36
+}
+
+function calc(){
+	var dice = $('#dmg').val();
+	
+	var out = parse( dice );
+	
+	var dice = $('#extra_dmg').val();
+	
+	out += parse( dice );
+	
+	$('#output').html( out );
+}
+
+function parse( _dice ){
+	var a = [];
+	var baseDmg = 0;
+	var permitations = [];
+	var terms = [];
+	var ti = -1;
+	var perms = [[]];
+	var pi;
+	var parenStartI = 0;
+	var parenEndI = 0;
+	
+	//First pass, sanatize
+	for( var i = 0; i < _dice.length; i++ ){
+		var letter = _dice.substring( i, i + 1 ).toLowerCase();
+		
+		if( letter == '(' )
+			parenStartI++;
+			
+		if( letter == ')' )
+			parenEndI++;
+		
+		if( letter === 'd' || $.isNumeric( letter ) || isOperator[ letter ] === true  )
+			a.push( letter );
+	}
+	
+	if( parenStartI !== parenEndI ){
+		$('#error').append( 'The number of open parentheses does not match the number of close parentheses.' )
+		return false;
+	}
+	
+	//Second pass, split into terms and operators 
+	for( var i = 0; i < a.length; i++ ){
+		if( isOperator[ a[i] ] === true && ( i - 1 < 0 || a[i] !== '-' || isOperator[ a[i] ] !== true ) ){
+			terms.push( a[i] );
+			ti = terms.length;
+			if( isOperator[ a[ i + 1 ] ] !== true )
+				terms.push( "" ); 
+		} else {
+			if( ti === -1 ){
+				ti = 0;
+				terms[ti] = "";
+			}
+			terms[ti] += a[i];
+		}
+	}
+	
+	//Parse terms (when dice)
+	for( ti = 0; ti < terms.length; ti++ ){ 
+		for( var i = 0; i < terms[ti].length; i++ ){
+			if( terms[ti].substring( i, i + 1 ) === 'd' ){
+				var count = "";
+				var die = 0;
+				
+				for( var j = i - 1; j >= 0; j-- ){
+					var letter = terms[ti].substring( j, j + 1 );
+					
+					if( $.isNumeric( letter ) ){
+						count = letter + count;
+					} else {
+						break;
+					}
+				}
+				
+				for( var j = i + 1; j < _dice.length; j++ ){
+					var letter = terms[ti].substring( j, j + 1 );
+					
+					if( $.isNumeric( letter ) ){
+						die += letter;
+					} else {
+						break;
+					}
+				}
+				
+				var avg = 0;
+				for( var j = 1; j <= die; j++ ){
+					avg += j;
+				}
+				
+				avg /= die;
+				
+				terms[ti] = avg * count;
+			}
+		}
+	}
+	
+	for( var i = 0; i < terms.length; i++ ){
+		if( terms[ i ] === '(' )
+			parentheses( terms, i );
+	}
+	
+	dmgCalc( terms );
+	
+	return terms[0];
+}
+
+function parentheses( _terms, _start ){
+	for( var i = _start + 1; i < _terms.length; i++ ){
+		if( _terms[ i ] === '(' )
+			parentheses( _terms, i );
+			
+		if( _terms[ i ] === ')' ){
+			_terms.splice( _start,1 );
+			i--;
+			_terms.splice( i,1 );
+			dmgCalc( _terms, _start, i - 1 );
+		}
+			
+	}
+}
+
+function dmgCalc( _terms, _start, _end ){
+	if( !_start || _start < 0 || _start > _terms.length - 1 )
+		_start = 0;
+		
+	if( !_end || _end < 0 || _end > _terms.length - 1 )
+		_end = _terms.length - 1;
+		
+	for( var i = _start; i < _end; i++ ){
+		if( isOperator[ _terms[i] ] === true ){
+			if( i - 1 < _start || i + 1 > _end || !$.isNumeric( _terms[ i - 1 ] ) || !$.isNumeric( _terms[ i + 1  ] ) ){
+				_terms.splice( i,1 )
+			}
+		}
+	}			
+				
+	for( var i = _start; i <= _end; i++ ){
+		if( _terms[i] === '*' ){
+			var num = parseFloat( _terms[ i - 1 ] )  * parseFloat( _terms[ i + 1 ] );
+			
+			_terms.splice( i - 1, 3, num );
+		}
+		
+		if( _terms[i] === '/' ){
+			var num = parseFloat( _terms[ i - 1 ] )  / parseFloat( _terms[ i + 1 ] );
+			
+			_terms.splice( i - 1, 3, num );
+		}
+	}
+	
+	for( var i = _start; i < _end; i++ ){
+		if( _terms[i] === '+' ){
+			var num = parseFloat( _terms[ i - 1 ] )  + parseFloat( _terms[ i + 1 ] );
+			
+			_terms.splice( i - 1, 3, num );
+			i--;
+		}
+		
+		if( _terms[i] === '-' ){
+			var num = parseFloat( _terms[ i - 1 ] )  - parseFloat( _terms[ i + 1 ] );
+			
+			_terms.splice( i - 1, 3, num );
+			i--;
+		}
+	}
+}
+
+function setNumeric( _name ){
+	var value = $('#' + _name).val();
+	
+	if( $.isNumeric( value ) ){
+		$('#' + _name).val( parseInt( value ) );
+	} else {
+		alert('The value is not numeric.')
+		$('#' + _name).val(0);
+	}	
+}

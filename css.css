@@ -1,0 +1,110 @@
+body{
+	margin: 30px;
+	font-family: Georgia, serif;
+	background-color: #3399CC;
+}
+
+label{
+	display:inline-block;
+	width: 150px;
+}
+
+label.wide{
+	display:inline-block;
+	width: 300px;
+}
+
+input[type="text"]{
+	width: 200px;
+}
+
+span.details{
+	font-size: .75em;
+}
+
+textarea{
+	width: 300px;
+	height: 3em;
+}
+
+input[type="text"].dice{
+	width: 300px;
+	text-align: left;
+}
+
+input[type="text"] {
+	width: 60px;
+	text-align: right;
+}
+
+input[type="text"].wide{
+	width: 150px;
+	text-align: right;
+}
+
+table {
+    border-collapse: collapse;
+    display: inline-block;
+}
+
+table, td, th {
+    border: 1px solid black;
+    vertical-align: top;
+}
+
+p.button{
+	margin: 30px 0 30px 0;
+}
+
+span.button{
+	font-weight: bold;
+	font-size: 1.25em;
+	background-color: #F2F7FA;
+	padding: 7px;
+	border: 1px solid black;
+	border-radius: 15px;
+	margin-right: 15px;
+}
+
+span.button:hover{
+	background-color: #A9C6D4;
+}
+
+span.button:active{
+	background-color: #D4B7A9;
+}
+
+div.profile{
+	vertical-align: top;
+	background-color: #ffffff;
+	padding: 20px;
+	margin-right: 15px;
+	display: inline-block;
+	width: 450px;	
+}
+
+span.contents{
+	white-space: nowrap;
+}
+
+div.white_back{
+	background-color: #ffffff;
+	padding: 10px;
+	white-space: nowrap;
+}
+
+#link_box{
+	background-color: #ffffff;
+	padding: 10px;
+	white-space: nowrap;
+}
+
+span.white_back{
+	background-color: #ffffff;
+	padding: 10px;
+}
+
+div.white_back_text{
+	background-color: #ffffff;
+	padding: 10px;
+}

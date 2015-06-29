@@ -1,0 +1,264 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Pathfinder Probability</title>
+	<script src="jquery-2.1.0.min.js"></script>
+	<script src="jquery.jqplot.js"></script>
+	<script src="jqplot.canvasTextRenderer.min.js"></script>
+	<script src="jqplot.canvasAxisLabelRenderer.min.js"></script>
+	<script src="jqplot.highlighter.min.js"></script>
+	<script src="jqplot.barRenderer.min.js"></script>
+	<script src="jqplot.barRenderer.min.js"></script>
+	<script src="jqplot.categoryAxisRenderer.min.js"></script>
+
+	<script src="array_math.js"></script>
+	
+	<script src="js.js"></script>
+	<script src="dice.js"></script>
+	<script src="terms.js"></script>
+	<script src="profile.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="jquery.jqplot.min.css">
+	<link rel="stylesheet" type="text/css" href="css.css">
+</head>
+<body>
+
+<p class="button">
+	<span onclick="$('#div_help').toggle();" class="button"><img src="help.png" /> About / Help</span>
+
+	<div name="div_help" id="div_help" class="white_back_text" style="display: none;">
+	<h1>About</h1>
+	<p>Hello World and welcome to Probability Pathfinder! 
+		This application is designed to calculate the Damage Per Round (DPR) of a protagonist or antagonist in the Pathfinder Role Playing game (or any other game that uses the "3.5" d20 game system). 
+		It has some important features that make it different from the typical DPR method:
+	<ol>
+	<li>Probability Pathfinder is not designed to simply calculate the average DPR using the standard formula <a href="http://paizo.com/threads/rzs2kac7?The-DPR-Olympics-or-Im-not-the-mechanic-here">(h(d+s)+tchd)</a>.
+		Instead it calculates the percentage likelihood of EVERY possible outcome in a round. 
+		This data is then plotted onto a histogram as well as being summed into a single average. 
+		The hope is by being able to "see" the probabilities behind the average will help players better understand the basic probabilities behind the game...or maybe I'm just a math nerd and no one else cares. 
+	</li> 
+	<li>This application is designed for multiple attacker profiles at once, giving you the ability to smoothly and easily compare multiple different builds against one another. 
+		For instance if you wanted to compare a <a href="http://fieldofbattlecards.com/dmg_calc/index.html?n=Falchion&b=6&h=4&ia=6,1&a=fa&d=2d4+15&ed=&c=18&m=2&ch=0&cd=&cr=cr&ac=6&n1=Greatsword&b1=6&h1=4&ia1=6,1&a1=fa&d1=2d6+15&ed1=&c1=19&m1=2&ch1=0&cd1=&cr1=cr&ac1=6&n2=Greataxe&b2=6&h2=4&ia2=6,1&a2=fa&d2=1d12+15&ed2=&c2=20&m2=3&ch2=0&cd2=&cr2=cr&ac2=6">6th level, 18-19 strength, power attacking fighter using an unenchanted Great Sword, Great Axe and Falchion, this tool will let you do that on one screen</a>.
+	</li>
+	<li>The data on this application is built for sharing. 
+		While no data is stored in the application itself, as you type data into the form a URL at the top of the page will dynamically change to reflect the form. 
+		Anyone who visits that URL will be shown the exact same data you just typed in; perfect for any internet arguments you want to have.
+	</li>
+	</ol>
+	</p>
+	
+	<h1>Directions</h1>
+	<p>At the heart of Pathfinder Probability is the form, contained in the left most box, this is where you will enter data into the tool, so understanding it is key to understanding the tool.
+		The form has the following inputs:
+	<ul>
+		<li><strong>Name / Label:</strong> this box simply provides a place to name the profile.
+			This name will be particularly important if you want to build multiple profiles.
+		</li>
+		<li><strong>BAB:</strong> this represents the Base Attack Bonus of the profile. 
+			This field isn't actually used in the calculations itself, but in conjunction with Action as a quick way to set both the "Iterative Attacks" and "CR" fields.
+		</li>
+		<li><strong>Action:</strong> this field is used along with BAB to set the default value for "Iterative Attacks." 
+			If set to Full Attack the Iterative Attacks will be automatically set based upon the BAB. 
+			While there is no practical difference between Standard Action and Natural Attacks (Full), properly setting this value will help others when they access your link.
+		</li>
+		<li><strong>Iterative Attacks:</strong> This is one of the most important input in the form, and understanding it properly will go a long way to getting the most out of this tool. 
+			"Iterative Attacks" takes a comma delimited list of whole numbers. 
+			For each whole number the tool will simulate the outcome of an attack at that BAB. 
+			For instance a level 1 fighter with just one attack would have an "Iterative Attacks" value of just 1. 
+			A sixth level Fighter would have an "Iterative Attacks" value of 6,1 - giving it an attack at BAB 6 and 1. 
+			A hasted sixth level Fighter on the other hand would have a value of 6,6,1 – giving it two attacks at BAB 6 and one attack at BAB 1. 
+			While a default value for this is set by the combination of "BAB" and "Action" feel free to manipulate this to get whatever your desired result. 
+			For instance if you wanted to simulate the two claw attacks of a Tiger you could create two different attacks with BAB 10 and Action Natural Attack (Full) with the same values, or you could have one attack with an iterative value of 10,10.
+		</li>
+		<li><strong>To Hit Modifiers:</strong> This value will be added to the value(s) in Iterative Attacks to get the total To Hit Modifier used by the profile. 
+			Typical modifiers that will be placed here are Strength, Master Craft/Magic Weapon modifiers, Weapon Focus, etc. 
+			This input will only take 1 whole number, not a formula. 
+			For instance a Strength 18 Fighter, with Weapon Focus and Weapon Training that is power attacking would have a To Hit Modifier of 4 NOT 4+1+1-2.
+		</li>
+		<li><strong>Damage:</strong> this input is used to enter the base damage of the attack. 
+			This is the damage that will be multiplied when you score a critical hit. 
+			You can provide any formula involving dice and whole numbers. 
+			Dice are defined with the standard xdy format where x is the number of dice and y is the number of sides on the dice (i.e. 2d6 for a great sword). 
+			If you want to get the full effect of this tool it is important that you use the dice format, not the average damage.  
+			Dice can be added, subtracted, divided, or multiplied by one another just as if they were a number. 
+			Your formulas can use any of the following characters: whole number, dice as defined above, +, -, *, /, (, or ).
+		</li>
+		<li><strong>Extra Damage:</strong> this input is for any base damage that is not multiplied by a critical, such as Sneak Attack damage, Extra Dice from magic weapons such as Flaming, etc. 
+			See the Damage section for what format your input should use.
+		</li>
+		<li><strong>Criticals:</strong> this section is where you enter the critical threat range as well as the critical multiplier of the attack. 
+			It is broken into two drop down boxes, the first one lets you select the critical threat range, the second the multiplier.
+		</li>
+		<li><strong>To Crit Modifiers:</strong> this input is for any bonuses you may have to confirm a critical, such as the feat Critical Focus. 
+			If the value is set to 101 critical hits will automatically be confirmed.
+		</li>
+		<li><strong>On Crit Only Damage:</strong> this is damage that is only applied when you score a critical hit. 
+			This can come from the Thundering magic weapon property, Bleeding Critical, etc. 
+			See the Damage section for what format your input should use.
+		</li>
+	</ul>
+	</p>
+	
+	<p>Finally there are two other buttons that you need to be familiar with. 
+		First "Add Attack" and second "Add Attacker Profile." 
+		Each profile has an "Add Attack" button that adds a second attack to the profile (remember if you do the same attack more than once you can just use Iterative). 
+		For instance a <a href="index.html?n=Long%20Sword%20%26%20Short%20Sword&b=6&h=4,4&ia=6,1;6&a=fa,sa&d=1d8+4,1d6+4&ed=,&c=19,19&m=2,2&ch=0,0&cd=,&cr=cr&ac=6" target="_blank">ranger that uses a long sword and short sword</a>, 
+			<a href="index.html?n=Composite%20Longbow%20w%2F%20Manyshot&b=6&h=4,4&ia=6;1&a=fa,sa&d=2d8+8,1d8+4&ed=,&c=20,20&m=3,3&ch=0,0&cd=,&cr=cr&ac=6" target="_blank">an archer with multiple attacks and manyshot</a>, or 
+			<a href="index.html?n=Adult%20Black%20Dragon&b=11&h=0,0,0,0&ia=21;20,20;15,15;15&a=na,na,na,na&d=2d6+10,1d8+7,1d6+3,1d8+10&ed=,,,&c=20,20,20,20&m=2,2,2,2&ch=0,0,0,0&cd=,,,&cr=cr&ac=11" target="_blank">a dragon with 1 bite, 2 claws, 2 wings, and a tail</a>. 
+		Once you have created a second attack on a profile it can be removed by simply clicking "Remove Attack."
+	</p>
+	<p>Add Attacker Profile is located at the top of the form. 
+		If clicked the current active form will be copied into a read only second profile to the right of the form. 
+		You can then use the active form to create a second profile to compare to the first. 
+		If you have more than one profile you can also edit or delete the additional read only forms. 
+		The buttons to do this are at the top of each additional form. 
+		Warning if you click "Edit Profile" it move the data from the read only profile, onto the form, erasing any data in the form in the process. 
+		To keep the data on the form, first click "Add Attacker Profile" to copy it into a new read only profile before clicking "Edit Profile".
+	</p>
+	</div>
+</p>
+
+<p class="button">
+	<span onclick="calc();" class="button"><img src="calculator.png" /> Calculate</span>
+</p>
+
+<span name="link_box" id="link_box">
+	Link to this data: <a name="a_link" id="a_link" target="_blank" href=""><span name="link" id="link"></span></a>
+</span>
+
+<p class="button">
+	<span name="hide_button" id="hide_button" onclick="toggleContent();" class="button"><img src="delete.png" /> Hide Forms</span>
+	<span name="show_button" id="show_button" onclick="toggleContent();" class="button" style="display: none;"><img src="add.png" /> Show Forms</span>
+</p>
+
+<span name="contents" id="contents" class="contents">		
+<div name="profile" id="profile" class="profile">
+<div name="profile_height" id="profile_height">
+	<span onclick="addProfile();" class="button"><img src="add.png" /> Add Attacker Profile</span>
+	<br /><br />
+	<strong>Attacker Profile</strong><br />
+	<p>
+		<label for="txt_name">Name / Label:</label>
+		<input name="txt_name" id="txt_name" type="text" class="wide" onchange="processForm( createLink );" />
+	</p>
+	<p>
+		<label for="txt_bab">BAB:</label>
+		<input name="txt_bab" id="txt_bab" type="text" onblur="setNumeric( this );setIterative( this );processForm( createLink );setCR();" />
+	</p>
+	<p>
+		<label for="txt_bab_mod_1">
+			To Hit Modifiers:<br />
+			<span class="details">(Str, Magic Weapons, etc.)</span>
+		</label>
+		<input name="txt_bab_mod_1" id="txt_bab_mod_1" type="text" onblur="setNumeric( this );processForm( createLink );" />
+	</p>
+	<p>
+		<label for="txt_iterative_1">Iterative Attacks:</label>
+		<input name="txt_iterative_1" id="txt_iterative_1" class="wide" type="text" onblur="sanitizeIterative( this );processForm( createLink );"  />
+	</p>
+	<p>
+		<label for="txt_action_1">Action:</label>
+		<select name="txt_action_1" id="txt_action_1" onchange="setIterative();processForm( createLink );">
+			<option value="fa">Full Attack</option>
+			<option value="sa">Standard Action</option>
+			<option value="na">Natural Attacks (Full)</option>
+		</select>
+	</p>
+	<p>
+		<label class="wide" for="dmg_1">Damage <span class="details">(Multipled by Criticals)</span>:</label><br />
+		<input name="dmg_1" id="dmg_1" type="text" class="dice" onblur="processForm( createLink );processForm( createLink );" />
+	</p>
+	<p>
+		<label class="wide" for="extra_dmg_1">Extra Damage <span class="details">(Not Multipled by Criticals)</span>:</label><br />
+		<input name="extra_dmg_1" id="extra_dmg_1" type="text" class="dice" onblur="processForm( createLink );" />
+	</p>
+	<p>
+		<label for="txt_crit_1">Criticals:</label>
+		<select name="txt_crit_1" id="txt_crit_1" onchange="processForm( createLink );">
+			<option value="20">20</option>
+			<option value="19">19-20</option>
+			<option value="18">18-20</option>
+			<option value="17">17-20</option>
+			<option value="15">15-20</option>
+		</select>
+		/
+		<select name="txt_multiplier_1" id="txt_multiplier_1" onchange="processForm( createLink );">
+			<option value="2">x2</option>
+			<option value="3">x3</option>
+			<option value="4">x4</option>
+			<option value="5">x5</option>
+		</select>
+	</p>
+	<p>
+		<label for="txt_bab_crit_1">
+			To Crit Modifiers:<br />
+			<span class="details">(To Confrim Crit Only)</span>
+		</label>
+		<input name="txt_bab_crit_1" id="txt_bab_crit_1" type="text" onblur="setNumeric( this );processForm( createLink );" />
+	</p>
+	<p>
+		<label class="wide" for="crit_dmg_1">On Crit Only Damage <span class="details">(i.e. <a href="http://paizo.com/pathfinderRPG/prd/magicItems/weapons.html#thundering">Thundering</a>)</span>:</label><br />
+		<input name="crit_dmg_1" id="crit_dmg_1" type="text" class="dice" onchange="processForm( createLink );" />
+	</p>
+	<span name="add_form" id="add_form"></span>
+	<p class="button">
+		<span onclick="addAttack();" class="button"><img src="add.png" /> Add Attack</span>
+	</p>
+	
+	<strong>Enemy CR/AC</strong><br />
+	<p>
+		<select name="txt_crac" id="txt_crac" onchange="cracChange();processForm( createLink );">
+			<option value="cr">CR</option>
+			<option value="ac">AC</option>
+		</select>
+		:
+		<input name="ac" id="ac" type="text" onblur="setNumeric( this );cracChange();processForm( createLink );" />
+		<span name="ac_out" id="ac_out"></span>
+	</p>
+	
+	<p class="button">
+		<span onclick="calc();" class="button"><img src="calculator.png" /> Calculate</span>
+	</p>
+</div>
+</div>
+</span>
+
+<p>
+	<div name="div_compare_graph" id="div_compare_graph" class="white_back" style="display: none;">
+		<div name="ct_compare_graph" id="ct_compare_graph"></div>
+	</div>
+</p>
+
+<span name="charts" id="charts" class="contents">
+<div name="profile_chart_1" id="profile_chart_1" class="profile">
+	<div name="output_1" id="output_1"></div>
+		
+	<div name="ct_dmg_1_1" id="ct_dmg_1_1" style="display: inline-block;"></div>
+	<span name="tbl_dmg_1_1" id="tbl_dmg_1_1"></span>
+	<br />
+	<span name="add_charts_1" id="add_charts_1"></span>
+	
+	<div name="ct_final_1" id="ct_final_1" style="display: inline-block;"></div>
+	<span name="tbl_final_1" id="tbl_final_1"></span>
+</div>
+</span>
+
+<script>
+	var linkPath = 'www.fieldofbattlecards.com/dmg_calc/';
+	$( document ).ready(function() {
+		var params = window.location.search.substring(1);
+		
+		profile = new Profile().init( params );
+		for( var i = 0; i < profile.forms.length; i++ ){
+			displayProfile( i );
+		}
+		createLink();
+		calc();
+		
+		if( profile.forms.length > 0 ){
+			toggleContent();
+		}
+	});
+</script>
+</body>
+</html>
